@@ -16,12 +16,30 @@ public class UsersController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username && u.Password == request.Password);
+        try
+        {
+            Console.WriteLine("LOGIN API HIT");
 
-        if (user == null) return Unauthorized("Invalid username or password");
-        return Ok(new { user.Id, user.Username });
+            if (request == null)
+                return BadRequest("Request body is null");
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u =>
+                    u.Username == request.Username &&
+                    u.Password == request.Password);
+
+            if (user == null)
+                return Unauthorized("Invalid username or password");
+
+            return Ok(new { user.Id, user.Username });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, ex.Message);
+        }
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetUsers()
