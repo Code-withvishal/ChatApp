@@ -7,24 +7,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers
 builder.Services.AddControllers();
 
-// ✅ CORS – NAMED POLICY (MOST IMPORTANT)
+// ✅ CORS POLICY (IMPORTANT)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowUI", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
         policy
             .WithOrigins("https://chatapp-ui-snwt.onrender.com")
             .AllowAnyHeader()
-            .AllowAnyMethod();
-        // ❌ AllowCredentials() intentionally NOT used
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
-// Database (PostgreSQL)
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 // Swagger
@@ -32,12 +30,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // SignalR
-builder.Services.AddSignalR(options =>
-{
-    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
-});
+builder.Services.AddSignalR();
 
-// ================= BUILD =================
 var app = builder.Build();
 
 // Swagger
@@ -48,8 +42,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-// ✅ APPLY CORS POLICY HERE
-app.UseCors("AllowUI");
+// ✅ VERY IMPORTANT ORDER
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 

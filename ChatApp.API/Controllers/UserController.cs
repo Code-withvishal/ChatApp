@@ -1,6 +1,7 @@
 ﻿using ChatApp.API.Data;
 using ChatApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ public class UsersController : ControllerBase
     private readonly AppDbContext _context;
     public UsersController(AppDbContext context) => _context = context;
 
-    [HttpPost("login")]
+    [HttpOptions("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var user = await _context.Users
