@@ -14,21 +14,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-// ✅ CORS — MUST BE BEFORE builder.Build()
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy
-            .WithOrigins(
-                "https://chatapp-ui-snwt.onrender.com",
-                "http://localhost:3000"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -50,7 +35,14 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 // ✅ CORS must be AFTER routing, BEFORE auth
-app.UseCors("CorsPolicy");
+// ✅ GLOBAL CORS – THIS FIXES PREFLIGHT
+app.UseCors(policy =>
+    policy
+        .WithOrigins("https://chatapp-ui-snwt.onrender.com")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+);
 
 app.UseAuthorization();
 

@@ -1,8 +1,10 @@
 ﻿using ChatApp.API.Data;
 using ChatApp.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+[AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
