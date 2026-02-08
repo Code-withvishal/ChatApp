@@ -59,4 +59,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 
+app.MapGet("/", () => "ChatApp API is running");
+app.MapMethods("{*path}", new[] { "OPTIONS" }, () => Results.Ok());
+
 app.Run();
+
