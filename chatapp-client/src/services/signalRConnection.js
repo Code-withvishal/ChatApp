@@ -1,12 +1,11 @@
 import * as signalR from "@microsoft/signalr";
 
 const connection = new signalR.HubConnectionBuilder()
-  .withUrl("https://chatapp-api.onrender.com/chathub", {
+  .withUrl("https://chatapp-vjiq.onrender.com/chathub", {
     withCredentials: true
   })
   .withAutomaticReconnect()
   .build();
-
 
 async function startConnection() {
   if (connection.state === signalR.HubConnectionState.Disconnected) {
