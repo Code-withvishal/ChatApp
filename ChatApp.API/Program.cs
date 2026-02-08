@@ -7,13 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers
 builder.Services.AddControllers();
 
+// ✅ ADD THIS LINE (MISSING THI)
+builder.Services.AddCors();
+
 // Database (PostgreSQL)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
-
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +26,7 @@ builder.Services.AddSignalR(options =>
 {
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
 });
+
 
 // ❗ ONLY NOW build the app
 var app = builder.Build();
