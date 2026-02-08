@@ -1,16 +1,19 @@
-﻿using ChatApp.API.Hubs;
-using ChatApp.API.Data;
+﻿using ChatApp.API.Data;
+using ChatApp.API.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Controllers
 builder.Services.AddControllers();
 
-// Database
+// ✅ Database (PostgreSQL / Neon)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -30,7 +33,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:3000",
-                "https://unrepresentational-superintensely-ema.ngrok-free.dev"
+                "https://unrepresentational-superintensely-ema.ngrok-free.dev",
+                "https://chatapp-ui-snwt.onrender.com"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
