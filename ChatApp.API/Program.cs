@@ -38,6 +38,7 @@ app.UseRouting();
 
 app.UseCors("RenderCors");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
