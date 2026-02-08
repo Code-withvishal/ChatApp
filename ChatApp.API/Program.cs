@@ -28,18 +28,21 @@ builder.Services.AddSignalR(options =>
 // ✅ CORS (FINAL & CORRECT)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy", policy =>
+    builder.Services.AddCors(options =>
     {
-        policy
-            .WithOrigins(
-                "http://localhost:3000",
-                "https://unrepresentational-superintensely-ema.ngrok-free.dev",
-                "https://chatapp-ui-snwt.onrender.com"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        options.AddPolicy("CorsPolicy", policy =>
+        {
+            policy
+                .WithOrigins(
+                    "https://chatapp-ui-snwt.onrender.com",
+                    "http://localhost:3000"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
     });
+
 });
 
 var app = builder.Build();
