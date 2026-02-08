@@ -4,48 +4,31 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================= SERVICES =================
-
-// Controllers
 builder.Services.AddControllers();
 
-// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Services.AddSignalR();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("RenderCors", policy =>
-    {
-        policy
-            .WithOrigins("https://chatapp-ui-snwt.onrender.com")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // REQUIRED for SignalR
-    });
+    policy.WithOrigins("https://chatapp-ui-snwt.onrender.com")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials());
 });
 
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// SignalR
-builder.Services.AddSignalR();
-
-// ================= BUILD =================
-
 var app = builder.Build();
-
-// ===========================================================
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
 app.UseRouting();
 
-app.UseCors("RenderCors"); // ⭐ MUST be here
+app.UseCors("RenderCors"); // MUST be before endpoints
 
 app.UseAuthorization();
 
