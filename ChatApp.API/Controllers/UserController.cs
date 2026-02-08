@@ -23,22 +23,28 @@ public class UsersController : ControllerBase
             if (request == null)
                 return BadRequest("Request body is null");
 
+            Console.WriteLine($"Username: {request.Username}");
+            Console.WriteLine($"Password: {request.Password}");
+
             var user = await _context.Users
-                .FirstOrDefaultAsync(u =>
-                    u.Username == request.Username &&
-                    u.Password == request.Password);
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
 
             if (user == null)
-                return Unauthorized("Invalid username or password");
+                return Unauthorized("User not found");
+
+            if (user.Password != request.Password)
+                return Unauthorized("Wrong password");
 
             return Ok(new { user.Id, user.Username });
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Console.WriteLine("LOGIN ERROR:");
+            Console.WriteLine(ex.ToString());
             return StatusCode(500, ex.Message);
         }
     }
+
 
 
     [HttpGet]
