@@ -30,7 +30,7 @@ const ChatWindow = ({ currentUser, onLogout }) => {
     const [inCall, setInCall] = useState(false);
 
     //const API_URL = "http://localhost:5090";
-    const API_URL=process.env.REACT_APP_API_URL;
+    const API_URL="https://chatapp-vjiq.onrender.com";
 
     // ================= AUTO SCROLL =================
     useEffect(() => {
