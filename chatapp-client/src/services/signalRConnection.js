@@ -1,21 +1,13 @@
-// src/services/signalRConnection.js
-import * as signalR from '@microsoft/signalr';
+import * as signalR from "@microsoft/signalr";
 
 const connection = new signalR.HubConnectionBuilder()
-  .withUrl("https://chatapp-vjiq.onrender.com/chatHub")  // ← FIXED
+  .withUrl("https://chatapp-api.onrender.com/chathub") // ✅ FIXED
   .withAutomaticReconnect()
   .build();
 
 async function startConnection() {
   if (connection.state === signalR.HubConnectionState.Disconnected) {
-    try {
-      await connection.start();
-      console.log("SignalR Connected.");
-    } catch (err) {
-      console.error("Connection failed: ", err);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return startConnection();
-    }
+    await connection.start();
   }
   return connection;
 }

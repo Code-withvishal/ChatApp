@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===================== SERVICES =====================
+// ================= SERVICES =================
 
 // Controllers
 builder.Services.AddControllers();
 
-// Database (PostgreSQL)
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -21,12 +21,11 @@ builder.Services.AddSwaggerGen();
 // SignalR
 builder.Services.AddSignalR();
 
-// ====================================================
+// ================= BUILD =================
 
 var app = builder.Build();
 
-// ===================== HARD CORS FIX =====================
-// This is REQUIRED for Render + browser preflight
+// ================= HARD CORS (RENDER SAFE) =================
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Access-Control-Allow-Origin"] =
@@ -44,14 +43,12 @@ app.Use(async (context, next) =>
 
     await next();
 });
-// =========================================================
+// ===========================================================
 
-// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
 app.UseAuthorization();
@@ -59,8 +56,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 
-app.MapGet("/", () => "ChatApp API is running");
-app.MapMethods("{*path}", new[] { "OPTIONS" }, () => Results.Ok());
+// Health check (IMPORTANT for Render)
+app.MapGet("/", () => "ChatApp API running");
 
 app.Run();
-
