@@ -7,8 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers
 builder.Services.AddControllers();
 
-// ✅ ADD THIS LINE (MISSING THI)
-builder.Services.AddCors();
+// ✅ CORS – NAMED POLICY (MOST IMPORTANT)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowUI", policy =>
+    {
+        policy
+            .WithOrigins("https://chatapp-ui-snwt.onrender.com")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        // ❌ AllowCredentials() intentionally NOT used
+    });
+});
 
 // Database (PostgreSQL)
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -27,9 +37,10 @@ builder.Services.AddSignalR(options =>
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
 });
 
-
-// ❗ ONLY NOW build the app
+// ================= BUILD =================
 var app = builder.Build();
+
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -37,15 +48,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-// ✅ CORS must be AFTER routing, BEFORE auth
-// ✅ GLOBAL CORS – THIS FIXES PREFLIGHT
-app.UseCors(policy =>
-    policy
-        .WithOrigins("https://chatapp-ui-snwt.onrender.com")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()
-);
+// ✅ APPLY CORS POLICY HERE
+app.UseCors("AllowUI");
 
 app.UseAuthorization();
 
