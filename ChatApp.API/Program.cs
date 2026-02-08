@@ -15,20 +15,28 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("RenderCors", policy =>
-    policy.WithOrigins("https://chatapp-ui-snwt.onrender.com")
-          .AllowAnyHeader()
-          .AllowAnyMethod()
-          .AllowCredentials());
+        policy.WithOrigins("https://chatapp-ui-snwt.onrender.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
+
+// Swagger services ARE registered
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// 🚨 Swagger ONLY in dev
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseRouting();
 
-app.UseCors("RenderCors"); // MUST be before endpoints
+app.UseCors("RenderCors");
 
 app.UseAuthorization();
 
