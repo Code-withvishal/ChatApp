@@ -1,0 +1,17 @@
+# React
+node_modules/
+build/
+
+# .NET
+bin/
+obj/
+publish/
+*.dll
+*.staticwebassets.*
+
+# VS
+.vs/
+.vscode/
+
+# Env
+.env
