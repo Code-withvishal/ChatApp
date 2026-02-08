@@ -29,7 +29,8 @@ const ChatWindow = ({ currentUser, onLogout }) => {
     const localStreamRef = useRef(null);
     const [inCall, setInCall] = useState(false);
 
-    const API_URL = "http://localhost:5090";
+    //const API_URL = "http://localhost:5090";
+    const API_URL=process.env.REACT_APP_API_URL;
 
     // ================= AUTO SCROLL =================
     useEffect(() => {

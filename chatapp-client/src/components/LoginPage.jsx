@@ -8,7 +8,9 @@ const LoginPage = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 //const API_URL = "https://chatapp-realtime-50bf.onrender.com";
-const API_URL = "http://localhost:5090";
+//const API_URL = "http://localhost:5090";
+const API_URL=process.env.REACT_APP_API_URL;
+
   const handleLogin = async () => {
     if (!username || !password) return setError("Enter both username and password");
     setLoading(true);
