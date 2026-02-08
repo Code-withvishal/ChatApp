@@ -4,23 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ===================== SERVICES =====================
+
 // Controllers
 builder.Services.AddControllers();
 
-// ✅ CORS POLICY (IMPORTANT)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .WithOrigins("https://chatapp-ui-snwt.onrender.com")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
-
-// Database
+// Database (PostgreSQL)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -32,7 +21,30 @@ builder.Services.AddSwaggerGen();
 // SignalR
 builder.Services.AddSignalR();
 
+// ====================================================
+
 var app = builder.Build();
+
+// ===================== HARD CORS FIX =====================
+// This is REQUIRED for Render + browser preflight
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Access-Control-Allow-Origin"] =
+        "https://chatapp-ui-snwt.onrender.com";
+    context.Response.Headers["Access-Control-Allow-Headers"] =
+        "Content-Type, Authorization";
+    context.Response.Headers["Access-Control-Allow-Methods"] =
+        "GET, POST, PUT, DELETE, OPTIONS";
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        return;
+    }
+
+    await next();
+});
+// =========================================================
 
 // Swagger
 app.UseSwagger();
@@ -41,9 +53,6 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
-// ✅ VERY IMPORTANT ORDER
-app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
