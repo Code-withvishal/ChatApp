@@ -13,6 +13,17 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RenderCors", policy =>
+    {
+        policy
+            .WithOrigins("https://chatapp-ui-snwt.onrender.com")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // REQUIRED for SignalR
+    });
+});
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -25,38 +36,22 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// ================= HARD CORS (RENDER SAFE) =================
-app.Use(async (context, next) =>
-{
-    context.Response.Headers["Access-Control-Allow-Origin"] =
-        "https://chatapp-ui-snwt.onrender.com";
-    context.Response.Headers["Access-Control-Allow-Headers"] =
-        "Content-Type, Authorization";
-    context.Response.Headers["Access-Control-Allow-Methods"] =
-        "GET, POST, PUT, DELETE, OPTIONS";
-
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        return;
-    }
-
-    await next();
-});
 // ===========================================================
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
 app.UseRouting();
+
+app.UseCors("RenderCors"); // ⭐ MUST be here
 
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<ChatHub>("/chathub");
+app.MapHub<ChatHub>("/chathub").RequireCors("RenderCors");
 
-// Health check (IMPORTANT for Render)
 app.MapGet("/", () => "ChatApp API running");
 
 app.Run();
