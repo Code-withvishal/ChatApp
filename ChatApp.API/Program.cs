@@ -15,7 +15,7 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("RenderCors", policy =>
-        policy.WithOrigins("https://chatapp-ui-snwt.onrender.com")
+        policy.WithOrigins("https://chatapp-ui-snwt.onrender.com", "http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());

@@ -400,7 +400,7 @@ connection.on("OnlineUsers", onlineIds => {
 }}
                                 onKeyDown={e => e.key === "Enter" && sendMessage(message)}
                                 placeholder="Message..."
-                                className="flex-1 px-4 py-2 border rounded-full"
+                                className="flex-1 min-w-0 px-4 py-2 border rounded-full"
                             />
 
                             <button onClick={() => sendMessage(message)} disabled={!message.trim()}
