@@ -17,7 +17,6 @@ const ChatWindow = ({ currentUser, onLogout }) => {
     const typingTimeout = useRef(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef(null);
-const [showActions, setShowActions] = useState(false);
 
     // 🎤 AUDIO
     const mediaRecorderRef = useRef(null);
@@ -29,7 +28,7 @@ const [showActions, setShowActions] = useState(false);
     const peerRef = useRef(null);
     const localStreamRef = useRef(null);
     const [inCall, setInCall] = useState(false);
-
+    const [showActions, setShowActions] = useState(false);
     //const API_URL = "http://localhost:5090";
     const API_URL="https://chatapp-vjiq.onrender.com";
 
@@ -320,7 +319,46 @@ connection.on("OnlineUsers", onlineIds => {
             </div>
 
             {/* CHAT AREA */}
-            <div className="flex items-center gap-2 p-2 bg-white border-t relative">
+            <div className="flex-1 p-2 overflow-hidden flex flex-col">
+                {selectedUser ? (
+                    <>
+                        {inCall && (
+                            <div className="flex gap-2 p-2 bg-black rounded mb-2">
+                                <video ref={localVideoRef} autoPlay muted className="w-28 h-28 rounded" />
+                                <video ref={remoteVideoRef} autoPlay className="w-60 h-40 rounded" />
+                                <button onClick={endVideoCall} className="bg-red-600 text-white px-3 rounded">End</button>
+                            </div>
+                        )}
+
+                        <div className="flex-1 overflow-y-auto space-y-2">
+                            {(allChats[String(selectedUser.id)] || []).map((c, i) => {
+                                let content;
+                                const imageSrc = c.message.startsWith("data:")
+                                    ? c.message
+                                    : `data:image/jpeg;base64,${c.message}`;
+
+                                if (c.type === "text") content = <span>{c.message}</span>;
+                                else if (c.type === "image") content = <img src={imageSrc} className="w-40 h-40 rounded-lg" alt="img" />;
+                                else if (c.type === "file")
+                                    content = <a href={`data:application/octet-stream;base64,${c.message}`} download={c.fileName}>{c.fileName}</a>;
+                                else if (c.type === "audio")
+                                    content = <audio controls className="w-40"><source src={`data:audio/webm;base64,${c.message}`} /></audio>;
+
+                                return (
+                                    <div key={i} className={`flex ${c.senderId === currentUser.id ? "justify-end" : "justify-start"}`}>
+                                        <div className={`max-w-[70%] p-2 rounded-xl ${c.senderId === currentUser.id ? "bg-blue-500 text-white" : "bg-white text-gray-800"}`}>
+                                            {content}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={messagesEndRef} />
+                            {typingUserId === selectedUser?.id && (
+                                <div className="text-gray-500 ml-2 italic text-sm">typing...</div>
+                            )}
+                        </div>
+
+                       <div className="flex items-center gap-2 p-2 bg-white border-t relative">
 
     {/* ➕ MORE BUTTON (ONLY MOBILE) */}
     <button
@@ -403,6 +441,13 @@ connection.on("OnlineUsers", onlineIds => {
     </button>
 </div>
 
+                    </>
+                ) : (
+                    <div className="flex-1 flex items-center justify-center text-gray-400 text-lg">
+                        Select a user to start chat
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
