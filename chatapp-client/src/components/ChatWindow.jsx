@@ -17,6 +17,7 @@ const ChatWindow = ({ currentUser, onLogout }) => {
     const typingTimeout = useRef(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef(null);
+const [showActions, setShowActions] = useState(false);
 
     // 🎤 AUDIO
     const mediaRecorderRef = useRef(null);
@@ -319,102 +320,89 @@ connection.on("OnlineUsers", onlineIds => {
             </div>
 
             {/* CHAT AREA */}
-            <div className="flex-1 p-2 overflow-hidden flex flex-col">
-                {selectedUser ? (
-                    <>
-                        {inCall && (
-                            <div className="flex gap-2 p-2 bg-black rounded mb-2">
-                                <video ref={localVideoRef} autoPlay muted className="w-28 h-28 rounded" />
-                                <video ref={remoteVideoRef} autoPlay className="w-60 h-40 rounded" />
-                                <button onClick={endVideoCall} className="bg-red-600 text-white px-3 rounded">End</button>
-                            </div>
-                        )}
+            <div className="flex items-center gap-2 p-2 bg-white border-t relative">
 
-                        <div className="flex-1 overflow-y-auto space-y-2">
-                            {(allChats[String(selectedUser.id)] || []).map((c, i) => {
-                                let content;
-                                const imageSrc = c.message.startsWith("data:")
-                                    ? c.message
-                                    : `data:image/jpeg;base64,${c.message}`;
+    {/* ➕ MORE BUTTON (ONLY MOBILE) */}
+    <button
+        onClick={() => setShowActions(p => !p)}
+        className="md:hidden flex-shrink-0 p-2 hover:bg-gray-200 rounded-full"
+    >
+        ➕
+    </button>
 
-                                if (c.type === "text") content = <span>{c.message}</span>;
-                                else if (c.type === "image") content = <img src={imageSrc} className="w-40 h-40 rounded-lg" alt="img" />;
-                                else if (c.type === "file")
-                                    content = <a href={`data:application/octet-stream;base64,${c.message}`} download={c.fileName}>{c.fileName}</a>;
-                                else if (c.type === "audio")
-                                    content = <audio controls className="w-40"><source src={`data:audio/webm;base64,${c.message}`} /></audio>;
+    {/* ACTION ICONS */}
+    <div
+        className={`
+            ${showActions ? "flex" : "hidden"}
+            absolute bottom-14 left-2 z-50 bg-white shadow rounded-xl p-2 gap-2
+            md:static md:flex md:shadow-none md:p-0
+        `}
+    >
+        <button onClick={startVideoCall} className="p-2 hover:bg-gray-200 rounded-full">
+            <FaVideo size={20} />
+        </button>
 
-                                return (
-                                    <div key={i} className={`flex ${c.senderId === currentUser.id ? "justify-end" : "justify-start"}`}>
-                                        <div className={`max-w-[70%] p-2 rounded-xl ${c.senderId === currentUser.id ? "bg-blue-500 text-white" : "bg-white text-gray-800"}`}>
-                                            {content}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            <div ref={messagesEndRef} />
-                            {typingUserId === selectedUser?.id && (
-                                <div className="text-gray-500 ml-2 italic text-sm">typing...</div>
-                            )}
-                        </div>
+        <button onClick={() => setShowEmojiPicker(p => !p)} className="p-2 hover:bg-gray-200 rounded-full">
+            <FaSmile size={20} />
+        </button>
 
-                        <div className="flex items-center gap-2 p-2 bg-white border-t">
-                            <button onClick={startVideoCall} className="p-2 hover:bg-gray-200 rounded-full"><FaVideo size={20} /></button>
-                            <button onClick={() => setShowEmojiPicker(p => !p)} className="p-2 hover:bg-gray-200 rounded-full"><FaSmile size={20} /></button>
+        <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-full">
+            <MdAttachFile size={22} />
+            <input type="file" className="hidden" onChange={handleFileChange} />
+        </label>
 
-                            {showEmojiPicker && (
-                                <div className="absolute bottom-20 z-50">
-                                    <Picker onEmojiClick={e => setMessage(prev => prev + e.emoji)} />
-                                </div>
-                            )}
+        <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-full">
+            <FaImage size={20} />
+            <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+        </label>
 
-                            <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-full">
-                                <MdAttachFile size={22} />
-                                <input type="file" className="hidden" onChange={handleFileChange} />
-                            </label>
+        <button
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            className="p-2 hover:bg-gray-200 rounded-full"
+        >
+            <FaMicrophone size={20} />
+        </button>
+    </div>
 
-                            <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-full">
-                                <FaImage size={20} />
-                                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                            </label>
+    {/* EMOJI PICKER */}
+    {showEmojiPicker && (
+        <div className="absolute bottom-20 left-2 z-50">
+            <Picker onEmojiClick={e => setMessage(prev => prev + e.emoji)} />
+        </div>
+    )}
 
-                            <button onMouseDown={startRecording} onMouseUp={stopRecording} className="p-2 hover:bg-gray-200 rounded-full">
-                                <FaMicrophone size={20} />
-                            </button>
+    {/* INPUT */}
+    <input
+        value={message}
+        onChange={e => {
+            setMessage(e.target.value);
 
-                            <input
-                                value={message}
-                                onChange={e => {
-    setMessage(e.target.value);
+            if (!selectedUser) return;
 
-    if (!selectedUser) return;
+            clearTimeout(typingTimeout.current);
 
-    clearTimeout(typingTimeout.current);
+            typingTimeout.current = setTimeout(() => {
+                if (connection.state === "Connected") {
+                    connection.invoke("UserTyping", currentUser.id, selectedUser.id);
+                }
+            }, 300);
+        }}
+        onKeyDown={e => e.key === "Enter" && sendMessage(message)}
+        placeholder="Message..."
+        className="flex-1 min-w-0 px-4 py-2 border rounded-full"
+    />
 
-    typingTimeout.current = setTimeout(() => {
-    if (connection.state === "Connected") {
-        connection.invoke("UserTyping", currentUser.id, selectedUser.id);
-    }
-}, 300);
+    {/* SEND */}
+    <button
+        onClick={() => sendMessage(message)}
+        disabled={!message.trim()}
+        className="flex-shrink-0 px-4 py-2 bg-blue-500 text-white rounded-full"
+    >
+        Send
+    </button>
+</div>
 
-}}
-                                onKeyDown={e => e.key === "Enter" && sendMessage(message)}
-                                placeholder="Message..."
-                                className="flex-1 min-w-0 px-4 py-2 border rounded-full"
-                            />
-
-                            <button onClick={() => sendMessage(message)} disabled={!message.trim()}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-full">
-                                Send
-                            </button>
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex-1 flex items-center justify-center text-gray-400 text-lg">
-                        Select a user to start chat
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
