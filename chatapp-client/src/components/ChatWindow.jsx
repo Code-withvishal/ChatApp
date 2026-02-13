@@ -299,7 +299,7 @@ connection.on("OnlineUsers", onlineIds => {
         <div className="flex flex-col h-screen bg-gray-100">
             <div className="flex justify-between items-center p-4 bg-white shadow">
                 <h2 className="font-bold">{currentUser.username}</h2>
-                <button onClick={onLogout} className="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+                <button onClick={onLogout} className="bg-blue-500 text-white px-3 py-1 rounded">Logout</button>
             </div>
 
             {/* USER LIST */}
