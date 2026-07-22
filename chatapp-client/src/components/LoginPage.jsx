@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { connection, startConnection } from "../services/signalRConnection";
 
@@ -7,6 +8,7 @@ const LoginPage = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 //const API_URL = "https://chatapp-realtime-50bf.onrender.com";
 //const API_URL = "http://localhost:5090";
 const API_URL =  process.env.REACT_APP_API_URL ||  "https://chatapp-vjiq.onrender.com";
@@ -64,16 +66,27 @@ const API_URL =  process.env.REACT_APP_API_URL ||  "https://chatapp-vjiq.onrende
         </div>
 
         <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Password</label>
-          <input
-            type="password"
-            className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
+  <label className="block text-gray-700 mb-2">Password</label>
+
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      className="w-full border border-gray-300 p-2 pr-10 rounded focus:ring-2 focus:ring-blue-500"
+      placeholder="Enter your password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      onKeyDown={handleKeyDown}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+    >
+      {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </button>
+  </div>
+</div>
 
         <button
           className={`w-full p-2 rounded text-white font-bold ${
