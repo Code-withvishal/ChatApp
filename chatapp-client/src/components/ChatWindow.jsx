@@ -1,5 +1,5 @@
 // 🔥 CHANGES ONLY IN MIC RECORDING LOGIC (Rest code untouched)
-
+import { FaCamera } from "react-icons/fa";
 import React, { useEffect, useState, useRef } from "react";
 import Picker from "emoji-picker-react";
 import { connection, startConnection } from "../services/signalRConnection";
@@ -17,6 +17,11 @@ const ChatWindow = ({ currentUser, onLogout }) => {
     const typingTimeout = useRef(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef(null);
+    
+    const [profileImage, setProfileImage] = useState(
+    localStorage.getItem(`profile_${currentUser.id}`) ||
+    "https://i.pravatar.cc/100"
+);
 
     // 🎤 AUDIO
     const mediaRecorderRef = useRef(null);
@@ -255,6 +260,13 @@ connection.on("OnlineUsers", onlineIds => {
         if (lastUser) handleUserClick(JSON.parse(lastUser));
     }, []);
 
+useEffect(() => {
+    const savedImage = localStorage.getItem(`profile_${currentUser.id}`);
+
+    if (savedImage) {
+        setProfileImage(savedImage);
+    }
+}, [currentUser.id]);
     // ================= FILE UPLOAD =================
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
@@ -293,14 +305,69 @@ connection.on("OnlineUsers", onlineIds => {
         };
         recorder.stop();
     };
+const handleProfileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        const image = reader.result;
+
+        setProfileImage(image);
+
+        localStorage.setItem(
+            `profile_${currentUser.id}`,
+            image
+        );
+    };
+
+    reader.readAsDataURL(file);
+};
     // ================= UI =================
     return (
         <div className="flex flex-col h-screen bg-gray-100">
             <div className="flex justify-between items-center p-4 bg-white shadow">
-                <h2 className="font-bold">{currentUser.username}</h2>
-                <button onClick={onLogout} className="bg-blue-500 text-white px-3 py-1 rounded">Logout</button>
-            </div>
+
+    <div className="flex items-center gap-3">
+
+        <div className="relative">
+            <img
+                src={profileImage}
+                alt="Profile"
+                className="w-12 h-12 rounded-full object-cover border"
+            />
+
+            <label
+                htmlFor="profile-upload"
+                className="absolute bottom-0 right-0 bg-blue-500 p-1 rounded-full cursor-pointer"
+            >
+                <FaCamera className="text-white text-xs" />
+            </label>
+
+            <input
+                id="profile-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleProfileUpload}
+            />
+        </div>
+
+        <h2 className="font-bold text-lg">
+            {currentUser.username}
+        </h2>
+
+    </div>
+
+    <button
+        onClick={onLogout}
+        className="bg-blue-500 text-white px-3 py-1 rounded"
+    >
+        Logout
+    </button>
+
+</div>
 
             {/* USER LIST */}
             <div className="flex overflow-x-auto p-2 space-x-3 bg-white border-b shadow">
